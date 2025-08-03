@@ -1,4 +1,6 @@
-
+import time
+from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
 
 MAX_DEPTH = 4
 START_STATE = "-"
@@ -41,6 +43,7 @@ class GameState:
             self.make_move(move)
 
     def make_move(self, move):
+        #print(move)
         color = move[0].lower()
         col = COL_TO_IDX[move[1].upper()]
         row = int(move[2]) - 1
@@ -110,14 +113,37 @@ class GameState:
         return None
 
 
-def solve(board_pgn, last_move=None):
+def solve(board_pgn, turn, max_depth, num_moves=0):
+    if num_moves == max_depth:
+        return
+
+    gs = GameState(board_pgn)
+
+    if gs.winner() is not None:
+        return
+
+    next_turn = "y" if turn == "r" else "r"
+
     s_map[board_pgn] = {}
 
+    for move in gs.legal_moves():
+        ngs = GameState(board_pgn)
+        ngs.make_move(turn + move)
+        npgn = "-".join(sorted(ngs.pgn().split("-")))
 
+        s_map[board_pgn][npgn] = 0
+        solve(npgn, next_turn, max_depth, num_moves + 1)
 
+    
+st = time.time()
+solve("-", "r", 7)
+#print(s_map)
 
+et = time.time()
 
-gs = GameState("rA1-yE1-rA2-yE2-rA3-yE3-rD1")
-print(gs.pgn())
-gs.make_move("y" + gs.legal_moves()[0])
-print(gs.pgn())
+print(et - st)
+
+#gs = GameState("rA1-yE1-rA2-yE2-rA3-yE3-rD1")
+#print(gs.pgn())
+#gs.make_move("y" + gs.legal_moves()[0])
+#print(gs.pgn())
