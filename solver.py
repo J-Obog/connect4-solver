@@ -27,7 +27,7 @@ class GameState:
         row = int(move[2]) - 1
         self.board[row][col] = color
 
-    def legal_moves(self, color):
+    def legal_moves(self):
         moves = []
         for col in range(7):
             i = 0
@@ -35,13 +35,68 @@ class GameState:
                 i += 1
 
             if i < 6:
-                moves.append(f"{color.lower()}{IDX_TO_COL[col]}{i+1}")
+                moves.append(f"{IDX_TO_COL[col]}{i+1}")
 
         return moves  
 
     def winner(self):
-        pass
+        def check_horizontal(color, start_coords):
+            row, col = start_coords
+
+            if col > 3:
+                return False
+            
+            return self.board[row][col+1] == color and self.board[row][col+2] == color and self.board[row][col+3] == color
+
+        def check_vertical(color, start_coords):
+            row, col = start_coords
+
+            if row > 2:
+                return False
+            
+            return self.board[row+1][col] == color and self.board[row+2][col] == color and self.board[row+3][col] == color
+
+        def check_left_diagonal(color, start_coords):
+            row, col = start_coords
+
+            if col < 3 or row > 2:
+                return False
+             
+            return self.board[row+1][col-1] == color and self.board[row+2][col-2] == color and self.board[row+3][col-3] == color
+
+        def check_right_diagonal(color, start_coords):
+            row, col = start_coords
+
+            if col > 3 or row > 2:
+                return False
+             
+            return self.board[row+1][col+1] == color and self.board[row+2][col+2] == color and self.board[row+3][col+3] == color  
+
+        for row in len(self.board):
+            for col in len(self.board[0]):
+                cell = self.board[row][col]
+                coords = (row, col)
+
+                if cell == "":
+                    continue
+                
+                if any(
+                    check_horizontal(cell, coords), 
+                    check_vertical(cell, coords), 
+                    check_right_diagonal(cell, coords),
+                    check_left_diagonal(cell, coords)):
+                    return cell
+
+        return None
 
 
 def solve(board_pgn, last_move=None):
     pass
+
+
+
+
+gs = GameState("rA1-yE1-rE2")
+
+
+print(gs.legal_moves())
