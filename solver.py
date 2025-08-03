@@ -10,12 +10,31 @@ IDX_TO_COL = {0:"A", 1:"B", 2:"C", 3:"D", 4:"E", 5:"F", 6:"G"}
 
 class GameState:
     def __init__(self, board_pgn):
-        self.board_pgn = board_pgn
         self.board = [[""]*7 for _ in range(6)]
-        self.setup_board()
+        self.setup_board(board_pgn)
 
-    def setup_board(self):
-        for move in self.board_pgn.split("-"):
+    def pgn(self):
+        pgn = ""
+
+        for row in range(len(self.board)):
+            for col in range(len(self.board[0])):
+                cell = self.board[row][col]
+
+                if cell == "":
+                    continue
+
+                m = f"{cell}{IDX_TO_COL[col]}{row + 1}"
+
+                if pgn == "":
+                    pgn = m
+                else:
+                    pgn += "-"
+                    pgn += m                
+
+        return pgn
+
+    def setup_board(self, board_pgn):
+        for move in board_pgn.split("-"):
             if move == "":
                 continue 
 
@@ -72,8 +91,9 @@ class GameState:
              
             return self.board[row+1][col+1] == color and self.board[row+2][col+2] == color and self.board[row+3][col+3] == color  
 
-        for row in len(self.board):
-            for col in len(self.board[0]):
+
+        for row in range(len(self.board)):
+            for col in range(len(self.board[0])):
                 cell = self.board[row][col]
                 coords = (row, col)
 
@@ -81,22 +101,23 @@ class GameState:
                     continue
                 
                 if any(
-                    check_horizontal(cell, coords), 
+                    [check_horizontal(cell, coords), 
                     check_vertical(cell, coords), 
                     check_right_diagonal(cell, coords),
-                    check_left_diagonal(cell, coords)):
+                    check_left_diagonal(cell, coords)]):
                     return cell
 
         return None
 
 
 def solve(board_pgn, last_move=None):
-    pass
+    s_map[board_pgn] = {}
 
 
 
 
-gs = GameState("rA1-yE1-rE2")
 
-
-print(gs.legal_moves())
+gs = GameState("rA1-yE1-rA2-yE2-rA3-yE3-rD1")
+print(gs.pgn())
+gs.make_move("y" + gs.legal_moves()[0])
+print(gs.pgn())
